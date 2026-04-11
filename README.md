@@ -1,96 +1,152 @@
-# 🎨 Technical Art Portfolio
+## 🌗 风格化写实角色展示（白天 / 夜晚）
 
-## 👤 About Me
-- Technical Art focused student (Blender / Shader / Unity)
-- Experienced in scene modeling, VFX and optimization
-- Internship experience in game environment production
+[![Day Preview](白天场景.gif)](白天场景.mp4)
+[![Night Preview](黑夜场景.gif)](黑夜场景.mp4)
 
----
+这个部分是基于给定资产做的一个**风格化写实角色展示**，主要目标是：
 
-## 🏰 1. Environment Art (Internship Project)
-
-### 🔹 Castle Scene Production
-- Modular modeling for scalable level design (Lv1–Lv6)
-- Instance optimization to reduce memory usage
-- Full pipeline: modeling → texturing → lighting
-
-### 🌿 Vegetation & Shader
-- Particle-based vegetation distribution
-- Leaf card + alpha shader optimization
-- Natural environment generation with performance balance
+* 在不依赖现成插件的情况下，自己实现材质风格控制
+* 让角色在**白天 / 夜晚两种光照环境下都有良好的表现**
+* 在保证效果的同时，尽量控制性能开销
 
 ---
 
-## ✨ 2. Dissolve Shader Effect (Unity)
+### ☀️ 白天场景设计思路
 
-- Shader-based dissolve animation using noise & gradient
-- Edge highlight enhancement for visual impact
-- Camera script for dynamic showcase
+白天环境主要使用较强的主光源（Directional Light），整体偏真实风格：
 
-🎥 Demo:
-[Watch Video](你的溶解视频链接)
+* 使用较高强度的平行光模拟太阳光
+* 阴影偏硬，强调结构细节
+* 环境光（Ambient）偏冷色，用来平衡高光部分
 
----
-
-## 🤖 3. Mechanical Animation (Detector)
-
-- Rigging-based mechanical animation
-- Hierarchy control for complex movement
-- Expand / rotate / retract animation system
-
-🎥 Demo:
-[Watch Video](你的探测器视频链接)
+在这个场景下，重点是让材质的**细节（法线 / 粗糙度）能够被正确表现出来**，避免“糊”或者“过曝”。
 
 ---
 
-## 🔥 4. Fireball VFX (Blender)
+### 🌙 夜晚场景设计思路
 
-- Mantaflow fire & smoke simulation
-- Emission shader for energy effect
-- Color ramp for realistic fire gradient
+夜晚环境整体偏风格化：
 
-🎥 Demo:
-[Watch Video](你的火焰视频链接)
+* 主光源强度降低，使用冷色调（蓝紫）
+* 增加环境光和局部补光（Fill Light）
+* 强化发光材质（Emission）的表现
 
----
+夜晚的重点不是“真实”，而是：
 
-## 🍩 5. Modeling Practice
-
-- Mesh modeling + material shading
-- Focus on lighting & rendering quality
-
-📸 Preview:
-![donut](你的图片链接)
+👉 **通过材质和光照去强化氛围和视觉引导**
 
 ---
 
-## 🎮 6. Unity 2D Game Demo
+## 🧪 材质实现与原理（重点）
 
-### Features
-- Character animation & combat system
-- Enemy AI (A* Pathfinding)
-- VFX (Particle System)
-- UI system (HP / EXP / Skill panel)
-
-### Technical Highlights
-- Shader-based water effect
-- Physics-based knockback system
-- Tilemap + Collider scene construction
-
-🎥 Demo:
-[Watch Video](你的游戏视频链接)
+这个项目中，我没有使用现成的 Shader 插件，主要基于引擎标准管线做了一些调整和扩展。
 
 ---
 
-## 🛠 Skills
-- Blender (Modeling / Simulation / Shader)
-- Unity (2D / VFX / UI / AI)
-- Shader (Dissolve / Emission / Optimization)
-- Technical Art Optimization
+### 🎨 1. 基础材质（Base PBR）
+
+大部分模型使用标准 PBR 材质：
+
+* **Albedo（基础色）**：控制整体颜色
+* **Normal（法线）**：增强表面细节（比如布料、金属纹理）
+* **Roughness（粗糙度）**：
+
+  * 值低 → 更光滑（反射强）
+  * 值高 → 更粗糙（漫反射为主）
+
+👉 在白天场景中：
+
+* 通过 Roughness 区分不同材质（皮肤 / 金属 / 布料）
+
+👉 在夜晚场景中：
+
+* 适当提高 Roughness，避免高光过亮导致“发白”
 
 ---
 
-## 🚀 Highlight
-- Balanced visual quality and performance
-- Real project experience in game production pipeline
-- Strong integration of art and engineering
+### ✨ 2. Emission（自发光材质）
+
+用于角色能量部分或高亮区域：
+
+* 使用 Emission 控制亮度与颜色
+* 在夜晚场景中适当提高强度
+
+实现思路：
+
+* 基于贴图控制发光区域
+* 使用颜色参数控制整体风格（偏蓝 / 偏橙）
+
+👉 作用：
+
+* 提升视觉焦点
+* 在低光环境中增强可读性
+
+---
+
+### 🌫 3. 风格化调整（非真实向）
+
+为了贴近“风格化写实”，我做了一些取舍：
+
+* 适当降低真实反射（减少金属过强反光）
+* 控制对比度，让整体更统一
+* 在夜晚通过色调统一氛围（偏冷色）
+
+👉 核心不是完全真实，而是：
+**在真实基础上做可控的风格偏移**
+
+---
+
+### 🔄 4. 日夜统一处理
+
+同一套材质需要适配两个环境：
+
+我主要做了这些处理：
+
+* 使用中性 Albedo，避免偏色太严重
+* Roughness 控制在合理范围（避免极端值）
+* Emission 单独控制（夜晚增强）
+
+👉 这样可以做到：
+
+* 白天看细节
+* 夜晚看氛围
+
+---
+
+## 🛠 我掌握的相关技能（真实向总结）
+
+这一部分是我在做这个项目过程中实际用到的：
+
+### 🎮 引擎 & 工具
+
+* Unity（基础开发 / Shader / 场景搭建）
+* Blender（建模 / 材质 / 简单模拟）
+
+---
+
+### 🎨 技术美术方向
+
+* 基础 Shader 原理（PBR / Emission / 溶解效果）
+* 材质调优（不同光照下的表现控制）
+* 灯光设计（白天 / 夜晚 / 氛围营造）
+
+---
+
+### ⚙️ 优化相关
+
+* 简单性能优化（材质统一 / 减少不必要开销）
+* 理解 Draw Call / 材质复用的基本思路
+
+---
+
+### 💡 我的理解（比较真实的一点）
+
+在做这个项目的时候，我最大的收获是：
+
+* 技术美术不只是“做效果”，而是要考虑**不同环境下的稳定表现**
+* 同一套资源在不同光照下的表现差异，其实很考验材质理解
+* 很多时候需要在“效果”和“性能”之间做取舍
+
+---
+
+> 如果有机会参与团队项目，希望可以在实际项目中继续深入优化这一块的能力。
